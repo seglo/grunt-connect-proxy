@@ -48,14 +48,17 @@ module.exports = function(grunt) {
         });
         if (validateProxyConfig(proxyOption)) {
             proxyOption.rules = utils.processRewrites(proxyOption.rewrite);
-            utils.registerProxy({
-              server: httpProxy.createProxyServer({
+            var server = httpProxy.createProxyServer({
                 target: proxyOption,
                 secure: proxyOption.https,
                 xfwd: proxyOption.xforward
-              }),
-              config: proxyOption
             });
+            server.on('error', utils.onProxyError);
+            utils.registerProxy({
+                server: server,
+                config: proxyOption
+            });
+            
             grunt.log.writeln('Proxy created for: ' +  proxyOption.context + ' to ' + proxyOption.host + ':' + proxyOption.port);
         }
     });
